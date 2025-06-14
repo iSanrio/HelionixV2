@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helionix - Análisis Químico con IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsqr/1.4.0/jsQR.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #1e40af;
+            --secondary-blue: #1d4ed8;
+            --light-blue: #dbeafe;
+            --accent-blue: #1e3a8a;
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-800: #1f2937;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
+            color: var(--gray-800);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 0;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .header .subtitle {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+            font-weight: 400;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-200);
+        }
+
+        .neural-network {
+            background: var(--light-blue);
+            border: 1px solid var(--primary-blue);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .neural-network h3 {
+            color: var(--accent-blue);
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .network-layers {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .layer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .layer-title {
+            font-size: 0.875rem;
+            color: var(--accent-blue);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .neuron {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+        }
+
+        .neuron:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .neuron.input { background: var(--primary-blue); }
+        .neuron.hidden { background: var(--secondary-blue); }
+        .neuron.output { background: var(--accent-blue); }
+
+        .element-input {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--gray-800);
+            font-size: 14px;
+            transition: border-color 0.2s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: 2px solid var(--primary-blue);
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--primary-blue);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: var(--shadow);
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: var(--primary-blue);
+            color: var(--white);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn:disabled:hover {
+            background: var(--white);
+            color: var(--primary-blue);
+            transform: none;
+        }
+
+        .qr-scanner {
+            background: var(--gray-50);
+            border: 2px dashed var(--gray-200);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .qr-scanner.active {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+        }
+
+        .camera-container {
+            position: relative;
+            display: inline-block;
+            margin: 16px 0;
+        }
+
+        #cameraPreview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .canvas-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .scan-result {
+            background: var(--success);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-weight: 500;
+        }
+
+        .scan-error {
+            background: var(--error);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-weight: 500;
+        }
+
+        .element-display {
+            background: var(--white);
+            border: 2px solid var(--primary-blue);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .element-name {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 10px;
+        }
+
+        .element-symbol {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin: 10px 0 20px;
+            line-height: 1;
+        }
+
+        .element-properties {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .property {
+            background: var(--gray-50);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            text-align: center;
+        }
+
+        .property-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .property-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .ai-prediction {
+            background: var(--light-blue);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .ai-prediction .label {
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .ai-prediction .content {
+            font-size: 1.125rem;
+            color: var(--gray-800);
+            font-weight: 600;
+        }
+
+        .control-center {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--gray-200);
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray-600);
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 16px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .element-input {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .element-symbol {
+                font-size: 3rem;
+            }
+
+            .network-layers {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .layer {
+                flex-direction: row;
+                gap: 15px;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Helionix</h1>
+            <p class="subtitle">Sistema profesional de análisis y clasificación de elementos químicos mediante inteligencia artificial</p>
+        </div>
+
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('manual')">Análisis Manual</div>
+                <div class="tab" onclick="switchTab('scanner')">Escáner QR</div>
+            </div>
+
+            <div id="manual-tab" class="tab-content active">
+                <div class="neural-network">
+                    <h3>Red Neuronal para Clasificación Química</h3>
+                    <div class="network-layers">
+                        <div class="layer">
+                            <div class="layer-title">Entrada</div>
+                            <div class="neuron input" title="Número Atómico">N°</div>
+                            <div class="neuron input" title="Masa Atómica">M</div>
+                            <div class="neuron input" title="Electronegatividad">E</div>
+                        </div>
+                        <div class="layer">
+                            <div class="layer-title">Procesamiento</div>
+                            <div class="neuron hidden" title="Neurona Oculta 1">H1</div>
+                            <div class="neuron hidden" title="Neurona Oculta 2">H2</div>
+                            <div class="neuron hidden" title="Neurona Oculta 3">H3</div>
+                        </div>
+                        <div class="layer">
+                            <div class="layer-title">Clasificación</div>
+                            <div class="neuron output" title="Categoría Predicha">C</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="element-input">
+                    <div class="input-group">
+                        <label>Número Atómico</label>
+                        <input type="number" id="atomicNumber" value="1" min="1" max="118">
+                    </div>
+                    <div class="input-group">
+                        <label>Masa Atómica</label>
+                        <input type="number" id="atomicMass" value="1.008" step="0.001">
+                    </div>
+                    <div class="input-group">
+                        <label>Electronegatividad</label>
+                        <input type="number" id="electronegativity" value="2.2" step="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label>Elemento de Referencia</label>
+                        <select id="elementSelect" onchange="loadElement()">
+                            <option value="1">Hidrógeno (H)</option>
+                            <option value="6">Carbono (C)</option>
+                            <option value="8">Oxígeno (O)</option>
+                            <option value="11">Sodio (Na)</option>
+                            <option value="26">Hierro (Fe)</option>
+                            <option value="79">Oro (Au)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="control-center">
+                    <button class="btn" onclick="predictCategory()">
+                        Realizar Predicción
+                    </button>
+                    <button class="btn" onclick="trainNetwork()">
+                        Entrenar Sistema
+                    </button>
+                </div>
+            </div>
+
+            <div id="scanner-tab" class="tab-content">
+                <div class="qr-scanner" id="qrScanner">
+                    <h3>Escáner de Códigos QR</h3>
+                    <p>Utilice la cámara para escanear códigos QR con información de elementos químicos</p>
+                    
+                    <div class="control-center">
+                        <button class="btn" id="startCamera" onclick="startCamera()">
+                            Iniciar Cámara
+                        </button>
+                        <button class="btn" id="stopCamera" onclick="stopCamera()" style="display: none;">
+                            Detener Cámara
+                        </button>
+                    </div>
+
+                    <div class="camera-container" id="cameraContainer" style="display: none;">
+                        <video id="cameraPreview" autoplay muted playsinline></video>
+                        <canvas id="qrCanvas" class="canvas-overlay"></canvas>
+                    </div>
+
+                    <div id="scanStatus"></div>
+                </div>
+            </div>
+
+            <div class="element-display" id="elementDisplay">
+                <div class="element-name" id="elementName">Hidrógeno</div>
+                <div class="element-symbol" id="elementSymbol">H</div>
+                
+                <div class="ai-prediction">
+                    <div class="label">Predicción del Sistema</div>
+                    <div class="content" id="predictedCategory">No Metal</div>
+                </div>
+
+                <div class="element-properties">
+                    <div class="property">
+                        <div class="property-label">Número Atómico</div>
+                        <div class="property-value" id="displayAtomicNumber">1</div>
+                    </div>
+                    <div class="property">
+                        <div class="property-label">Masa Atómica</div>
+                        <div class="property-value" id="displayAtomicMass">1.008</div>
+                    </div>
+                    <div class="property">
+                        <div class="property-label">Electronegatividad</div>
+                        <div class="property-value" id="displayElectronegativity">2.2</div>
+                    </div>
+                    <div class="property">
+                        <div class="property-label">Categoría</div>
+                        <div class="property-value" id="displayCategory">No metal</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos de elementos químicos
+        const elementos = {
+            1: { nombre: "Hidrógeno", simbolo: "H", numero_atomico: 1, masa_atomica: 1.008, electronegatividad: 2.2, categoria: "No metal" },
+            6: { nombre: "Carbono", simbolo: "C", numero_atomico: 6, masa_atomica: 12.011, electronegatividad: 2.55, categoria: "No metal" },
+            8: { nombre: "Oxígeno", simbolo: "O", numero_atomico: 8, masa_atomica: 15.999, electronegatividad: 3.44, categoria: "No metal" },
+            11: { nombre: "Sodio", simbolo: "Na", numero_atomico: 11, masa_atomica: 22.990, electronegatividad: 0.93, categoria: "Metal alcalino" },
+            26: { nombre: "Hierro", simbolo: "Fe", numero_atomico: 26, masa_atomica: 55.845, electronegatividad: 1.83, categoria: "Metal de transición" },
+            79: { nombre: "Oro", simbolo: "Au", numero_atomico: 79, masa_atomica: 196.967, electronegatividad: 2.54, categoria: "Metal de transición" }
+        };
+        
+        // Variables para el escáner QR
+        let videoStream = null;
+        let scanningActive = false;
+        let scanInterval = null;
+        
+        // Red neuronal simple para clasificación
+        class SimpleNeuralNetwork {
+            constructor() {
+                this.weights = {
+                    input_hidden: [
+                        [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5],
+                        [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5],
+                        [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]
+                    ],
+                    hidden_output: [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5]
+                };
+                this.bias = {
+                    hidden: [Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5],
+                    output: Math.random() - 0.5
+                };
+                this.learningRate = 0.1;
+                this.epochs = 0;
+            }
+            
+            sigmoid(x) {
+                return 1 / (1 + Math.exp(-x));
+            }
+            
+            predict(inputs) {
+                // Normalizar inputs
+                const normalized = [
+                    inputs[0] / 118, // Número atómico
+                    inputs[1] / 300, // Masa atómica
+                    inputs[2] / 4    // Electronegatividad
+                ];
+                
+                // Capa oculta
+                const hidden = [];
+                for (let i = 0; i < 3; i++) {
+                    let sum = this.bias.hidden[i];
+                    for (let j = 0; j < 3; j++) {
+                        sum += normalized[j] * this.weights.input_hidden[i][j];
+                    }
+                    hidden.push(this.sigmoid(sum));
+                }
+                
+                // Capa de salida
+                let output = this.bias.output;
+                for (let i = 0; i < 3; i++) {
+                    output += hidden[i] * this.weights.hidden_output[i];
+                }
+                
+                const prediction = this.sigmoid(output);
+                return {
+                    output: prediction,
+                    hidden: hidden,
+                    category: this.classifyElement(prediction, inputs),
+                    confidence: Math.round(Math.abs(prediction - 0.5) * 200)
+                };
+            }
+            
+            classifyElement(prediction, inputs) {
+                const [atomicNumber, atomicMass, electronegativity] = inputs;
+                
+                // Clasificación basada en propiedades químicas
+                if (atomicNumber <= 2) return "Gas noble/No metal";
+                if (atomicNumber >= 3 && atomicNumber <= 10) {
+                    return electronegativity > 2.5 ? "No metal" : "Metal alcalino";
+                }
+                if (atomicNumber >= 11 && atomicNumber <= 20) {
+                    return electronegativity < 1.5 ? "Metal alcalino/alcalinotérreo" : "No metal";
+                }
+                if (atomicNumber >= 21 && atomicNumber <= 30) {
+                    return "Metal de transición";
+                }
+                
+                return prediction > 0.6 ? "Metal" : "No metal";
+            }
+            
+            train(trainingData, epochs = 100) {
+                for (let epoch = 0; epoch < epochs; epoch++) {
+                    for (let data of trainingData) {
+                        const result = this.predict(data.inputs);
+                        const target = data.category.includes("Metal") ? 1 : 0;
+                        const error = target - result.output;
+                        
+                        // Actualización simple de pesos
+                        const outputDelta = error * result.output * (1 - result.output);
+                        
+                        for (let i = 0; i < 3; i++) {
+                            this.weights.hidden_output[i] += this.learningRate * outputDelta * result.hidden[i];
+                        }
+                        this.bias.output += this.learningRate * outputDelta;
+                    }
+                }
+                this.epochs += epochs;
+            }
+        }
+        
+        let neuralNetwork = new SimpleNeuralNetwork();
+        let currentElement = 1;
+        
+        // Funciones de interfaz
+        function switchTab(tabName) {
+            // Ocultar todos los contenidos de tab
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remover clase active de todos los tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Mostrar el contenido del tab seleccionado
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Activar el tab seleccionado
+            event.target.classList.add('active');
+            
+            // Si se cambia a otro tab, detener la cámara
+            if (tabName !== 'scanner' && videoStream) {
+                stopCamera();
+            }
+        }
+        
+        function loadElement() {
+            const elementId = parseInt(document.getElementById('elementSelect').value);
+            currentElement = elementId;
+            const element = elementos[elementId];
+            
+            document.getElementById('atomicNumber').value = element.numero_atomico;
+            document.getElementById('atomicMass').value = element.masa_atomica;
+            document.getElementById('electronegativity').value = element.electronegatividad;
+            
+            updateElementDisplay(element);
+        }
+        
+        function updateElementDisplay(element) {
+            document.getElementById('elementName').textContent = element.nombre;
+            document.getElementById('elementSymbol').textContent = element.simbolo;
+            document.getElementById('displayAtomicNumber').textContent = element.numero_atomico;
+            document.getElementById('displayAtomicMass').textContent = element.masa_atomica;
+            document.getElementById('displayElectronegativity').textContent = element.electronegatividad;
+            document.getElementById('displayCategory').textContent = element.categoria;
+        }
+        
+        function predictCategory() {
+            const atomicNumber = parseFloat(document.getElementById('atomicNumber').value);
+            const atomicMass = parseFloat(document.getElementById('atomicMass').value);
+            const electronegativity = parseFloat(document.getElementById('electronegativity').value);
+            
+            const prediction = neuralNetwork.predict([atomicNumber, atomicMass, electronegativity]);
+            
+            document.getElementById('predictedCategory').textContent = prediction.category;
+            
+            // Animar neuronas
+            animateNeurons();
+        }
+        
+        function trainNetwork() {
+            const trainingData = Object.values(elementos).map(element => ({
+                inputs: [element.numero_atomico, element.masa_atomica, element.electronegatividad],
+                category: element.categoria
+            }));
+            
+            neuralNetwork.train(trainingData, 50);
+            
+            // Animar entrenamiento
+            animateNeurons();
+        }
+        
+        function animateNeurons() {
+            const neurons = document.querySelectorAll('.neuron');
+            neurons.forEach((neuron, index) => {
+                setTimeout(() => {
+                    neuron.style.transform = 'scale(1.2)';
+                    neuron.style.boxShadow = '0 0 20px rgba(30, 64, 175, 0.8)';
+                    setTimeout(() => {
+                        neuron.style.transform = 'scale(1)';
+                        neuron.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                    }, 300);
+                }, index * 100);
+            });
+        }
+        
+        // Funciones del escáner QR
+        async function startCamera() {
+            try {
+                const constraints = {
+                    video: {
+                        facingMode: 'environment', // Usar cámara trasera si está disponible
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                };
+                
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const video = document.getElementById('cameraPreview');
+                video.srcObject = videoStream;
+                
+                document.getElementById('cameraContainer').style.display = 'block';
+                document.getElementById('startCamera').style.display = 'none';
+                document.getElementById('stopCamera').style.display = 'inline-flex';
+                document.getElementById('qrScanner').classList.add('active');
+                
+                // Iniciar el escaneo
+                scanningActive = true;
+                scanForQRCode();
+                
+                showScanStatus('Cámara iniciada. Apunte hacia un código QR.', 'info');
+                
+            } catch (error) {
+                console.error('Error al acceder a la cámara:', error);
+                let errorMessage = 'Error al acceder a la cámara: ';
+                
+                if (error.name === 'NotAllowedError') {
+                    errorMessage += 'Permiso denegado. Por favor, permite el acceso a la cámara.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage += 'No se encontró ninguna cámara.';
+                } else if (error.name === 'NotSupportedError') {
+                    errorMessage += 'Navegador no compatible.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showScanStatus(errorMessage, 'error');
+            }
+        }
+        
+        function stopCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            
+            scanningActive = false;
+            if (scanInterval) {
+                clearInterval(scanInterval);
+                scanInterval = null;
+            }
+            
+            document.getElementById('cameraContainer').style.display = 'none';
+            document.getElementById('startCamera').style.display = 'inline-flex';
+            document.getElementById('stopCamera').style.display = 'none';
+            document.getElementById('qrScanner').classList.remove('active');
+            
+            showScanStatus('Cámara detenida.', 'info');
+        }
+        
+        function scanForQRCode() {
+            if (!scanningActive) return;
+            
+            const video = document.getElementById('cameraPreview');
+            const canvas = document.getElementById('qrCanvas');
+            const context = canvas.getContext('2d');
+            
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                const code = jsQR(imageData.data, imageData.width, imageData.height);
+                
+                if (code) {
+                    processQRCode(code.data);
+                    return;
+                }
