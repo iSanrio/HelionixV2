@@ -1,4 +1,3 @@
-// Base de datos de elementos extendida
 const elementos = {
     "1": {
         "nombre": "Hidrógeno",
@@ -2126,7 +2125,6 @@ const elementos = {
 }
 };
 
-// Implementación de Random Forest
 class RandomForest {
     constructor(numTrees = 15) {
         this.numTrees = numTrees;
@@ -2146,23 +2144,21 @@ class RandomForest {
     }
 
     startBackgroundTraining() {
-        // Detener cualquier entrenamiento previo
+
         if (this.trainingInterval) clearInterval(this.trainingInterval);
         
-        // Iniciar entrenamiento periódico
         this.trainingInterval = setInterval(() => {
             if (!this.isTraining && this.trainingData.length > 0) {
                 this.train(this.trainingData);
                 console.log('Modelo reentrenado en segundo plano');
             }
-        }, 30000); // Entrenar cada 30 segundos
+        }, 30000); 
     }
 
     addTrainingData(element) {
         this.trainingData.push(element);
         console.log(`Dato de entrenamiento agregado: ${element.nombre}`);
         
-        // Si tenemos suficientes datos, entrenar inmediatamente
         if (this.trainingData.length >= 5 && !this.isTraining) {
             this.train(this.trainingData);
         }
@@ -2177,15 +2173,13 @@ class RandomForest {
         this.trees = [];
         this.classes = new Set(trainingData.map(item => item.categoria));
         
-        // Simular un proceso de entrenamiento más complejo
+
         for (let i = 0; i < this.numTrees; i++) {
-            // Crear un árbol con un subconjunto aleatorio de datos
             const subset = this.createRandomSubset(trainingData);
             const tree = this.buildTree(subset);
             this.trees.push(tree);
         }
         
-        // Calcular precisión simulada
         const correctPredictions = trainingData.filter(entry => {
             const prediction = this.predictSingle(entry);
             return prediction === entry.categoria;
@@ -2200,7 +2194,6 @@ class RandomForest {
     }
 
     createRandomSubset(data) {
-        // Crear un subconjunto aleatorio de datos (con reemplazo)
         const subset = [];
         for (let i = 0; i < data.length; i++) {
             const randomIndex = Math.floor(Math.random() * data.length);
@@ -2210,10 +2203,8 @@ class RandomForest {
     }
 
     buildTree(data) {
-        // Implementación simplificada de un árbol de decisión
         return {
             predict: (features) => {
-                // Lógica predictiva basada en reglas
                 if (features.electronegatividad === null) return "Gas noble";
                 if (features.numero_atomico >= 57 && features.numero_atomico <= 71) return "Lantánido";
                 if (features.numero_atomico >= 89 && features.numero_atomico <= 103) return "Actínido";
@@ -2230,13 +2221,11 @@ class RandomForest {
     predict(features) {
         const votes = {};
         
-        // Recopilar votos de todos los árboles
         for (const tree of this.trees) {
             const prediction = tree.predict(features);
             votes[prediction] = (votes[prediction] || 0) + 1;
         }
         
-        // Encontrar la predicción con más votos
         let maxVotes = 0;
         let finalPrediction = '';
         
@@ -2263,19 +2252,15 @@ class RandomForest {
     }
 }
 
-// Crear modelo de Random Forest
 const ai = new RandomForest();
 let qrScanner = null;
 let currentAudio = null;
 
-// Preparar datos de entrenamiento inicial
 const initialTrainingData = Object.values(elementos);
 ai.train(initialTrainingData);
 
-// Iniciar entrenamiento en segundo plano
 ai.startBackgroundTraining();
 
-// Event listeners
 document.getElementById('scanBtn').addEventListener('click', toggleScanner);
 document.getElementById('periodicBtn').addEventListener('click', togglePeriodicTable);
 document.getElementById('playAudioBtn').addEventListener('click', playElementAudio);
@@ -2329,12 +2314,10 @@ async function startScanner() {
         status.textContent = "Solicitando acceso a la cámara...";
         status.className = "status";
         
-        // Verificar si QrScanner está disponible
         if (typeof QrScanner === 'undefined') {
             throw new Error('QrScanner no está cargado');
         }
         
-        // Verificar compatibilidad del navegador
         const hasCamera = await QrScanner.hasCamera();
         if (!hasCamera) {
             throw new Error('No se detectó cámara en el dispositivo');
@@ -2351,13 +2334,11 @@ async function startScanner() {
                     status.textContent = `✅ Elemento ${elementId} (${elementos[elementId].nombre}) detectado`;
                     status.className = "status success";
                     
-                    // Feedback visual/sonoro
                     video.style.borderColor = 'var(--primary-green)';
                     setTimeout(() => {
                         video.style.borderColor = 'var(--gray-200)';
                     }, 1000);
                     
-                    // Agregar a datos de entrenamiento
                     ai.addTrainingData(elementos[elementId]);
                     
                 } else {
@@ -2367,7 +2348,6 @@ async function startScanner() {
             },
             {
                 onDecodeError: error => {
-                    // Solo mostrar errores importantes
                     if (error.message && !error.message.includes('No QR code found')) {
                         console.warn('Error de decodificación:', error);
                     }
@@ -2375,7 +2355,7 @@ async function startScanner() {
                 highlightScanRegion: true,
                 highlightCodeOutline: true,
                 maxScansPerSecond: 5,
-                preferredCamera: 'environment' // Cámara trasera en móviles
+                preferredCamera: 'environment'
             }
         );
 
@@ -2444,7 +2424,7 @@ function processElement(elementId) {
     const element = elementos[elementId];
     if (!element) return;
 
-    // Usar el modelo de Random Forest para la predicción
+
     const aiPrediction = ai.predictSingle(element);
 
     document.getElementById('elementSymbol').textContent = element.simbolo;
@@ -2484,7 +2464,6 @@ function processElement(elementId) {
 
     document.getElementById('elementInfo').classList.add('active');
     
-    // Scroll suave a la información del elemento
     document.getElementById('elementInfo').scrollIntoView({ behavior: 'smooth' });
 }
 
